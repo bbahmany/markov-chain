@@ -7,24 +7,15 @@ def build_ngrams(itr, n=2):
     ngrams = zip(*(islice(group, i, None) for i, group in enumerate(tee(itr, n))))
     return ngrams
 
-
-with open('trump.txt') as f:
-    tokens = chain(*map(lambda line:line.strip().split(' '),f.readlines()))
-    chains = build_ngrams(tokens, 3)
-
-
 # have to make two passes here to build it in matrix form :(
 # the matrix has nice properties, so i will use it here instead of dict->dict->prob
-def init_transition_matrix(ngrams):
-    state_spaces_grouped = ((str(ngram[:-1]),str(ngram[1:])) for ngram in ngrams)
-    state_spaces_ungrouped = chain(*((str(ngram[:-1]),str(ngram[1:])) for ngram in ngrams))
-    state_lookup = sorted(list(set(state_spaces_ungrouped)))
-    P = pd.DataFrame(0, index=state_lookup, columns=state_lookup)
-    return { 'markov_process': state_spaces_grouped,
-             'state_lookup': state_lookup,
-             'P': P }
+def build_markov_states(ngrams):
+    state_spaces_grouped = list((str(ngram[:-1]),str(ngram[1:])) for ngram in ngrams)
+    state_space = sorted(list(set(chain(*state_spaces_grouped))))
+    return {'state_space': state_space, 'state_spaces_grouped':state_spaces_grouped}
 
-def populate_transition_matrix(P, markov_process, normalize=True):
+def build_transition_matrix(state_space, markov_process, normalize=True):
+    P = pd.DataFrame(0, index=state_space, columns=state_space)
     for trans in markov_process:
         P.loc[trans[0], trans[1]] =  P.loc[trans[0], trans[1]] + 1
 
@@ -33,6 +24,18 @@ def populate_transition_matrix(P, markov_process, normalize=True):
 
     return P
 
-result = init_transition_matrix(list(chains))
-P = populate_transition_matrix(result['P'], result['markov_process'])
-print(P.sum(axis=1))
+def get_transition_matrix(text_file, normalize=True):
+    
+    with open(text_file) as f:
+        tokens = chain(*map(lambda line:line.strip().split(' '),f.readlines()))
+    
+    ngrams = build_ngrams(tokens, 3)
+    states = build_markov_states(ngrams)
+    P = build_transition_matrix(states['state_space'], states['state_spaces_grouped'])
+    print(P.sum(axis=1))
+
+get_transition_matrix('trump.txt')
+
+#result = init_transition_matrix(list(chains))
+#P = populate_transition_matrix(result['P'], result['markov_process'])
+#print(P.sum(axis=1))
