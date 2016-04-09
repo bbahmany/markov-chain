@@ -1,13 +1,14 @@
+import re
+import string
 import itertools
 import requests
 from bs4 import BeautifulSoup
 
 # Simple NLP tokenizer
 
-def sanitize_words(words, 
-                   punctuation='`~!@#$%^&*()_-+={[}]|\:;"<,>.?/}\t\n',
+def sanitize_words(words,
+                   punctuation="`~!@#$%^&*()_-+={[}]|\:;'<,>.?/}\t\n",
                    stop_words=['ph']):
-
     """
     Removes punction from words
 
@@ -15,9 +16,11 @@ def sanitize_words(words,
             punctuation (string)---punctuation to remove
     Returns: (generator) cleaned words
     """
+    regex = re.compile('[%s]' % re.escape(string.punctuation))
     for word in words:
-        if not word.isupper() or 'ISIS' in word:
-            yield word.strip(punctuation).lower()
+        if word not in stop_words and (not word.isupper() or 'ISIS' in word):
+            #yield re.sub(punctuation, '', word).lower()
+            yield regex.sub('', word).lower()
 
 def tokenize_line(line):
     """
