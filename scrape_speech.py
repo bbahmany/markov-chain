@@ -19,7 +19,6 @@ def sanitize_words(words,
     regex = re.compile('[%s]' % re.escape(string.punctuation))
     for word in words:
         if word not in stop_words and (not word.isupper() or 'ISIS' in word):
-            #yield re.sub(punctuation, '', word).lower()
             yield regex.sub('', word).lower()
 
 def tokenize_line(line):
@@ -44,10 +43,9 @@ def write_tokens_to_file(output_file, tokens, line_split=50):
             if token_count is not 0 and token_count % 50 == 0:
                 out.write('\n')
 
-#        for line in token_lines: 
-#            out.write(' '.join(line) + '\n')
-        #out.writelines((' '.join(line)+'\n') for line in token_lines if line is not [])
-urls = ['https://www.washingtonpost.com/news/post-politics/wp/2015/06/16/full-text-donald-trump-announces-a-presidential-bid/','https://www.washingtonpost.com/news/post-politics/wp/2016/02/20/transcript-donald-trumps-victory-speech-after-the-south-carolina-gop-primary/']
+urls = [
+'https://www.washingtonpost.com/news/post-politics/wp/2015/06/16/full-text-donald-trump-announces-a-presidential-bid/',
+'https://www.washingtonpost.com/news/post-politics/wp/2016/02/20/transcript-donald-trumps-victory-speech-after-the-south-carolina-gop-primary/']
 skips = [1,1]
 
 tokens = itertools.chain(*parse_speeches(urls, skips))
