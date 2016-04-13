@@ -1,2 +1,4 @@
+*.html
+.ipynb*
 env/
 __pycache__/
